@@ -43,7 +43,7 @@ jobs:
 
       - name: Build
         run: |
-          pnpm build
+          pnpm docs:build
 
       - name: Upload
         uses: actions/upload-pages-artifact@v3
