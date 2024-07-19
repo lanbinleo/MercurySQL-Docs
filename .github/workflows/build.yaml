@@ -1,0 +1,55 @@
+name: Build Site
+
+on:
+  push:
+    branches:
+      - main
+
+permissions: 
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+        with:
+          ref: main
+
+      - name: Set Timezone
+        uses: szenius/set-timezone@v1.2
+        with:
+          timezoneLinux: "Asia/Shanghai"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with: 
+          version: latest
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install Deps
+        env:
+          ACTION_DEPLOY_KEY: ${{ secrets.HEXO_DEPLOY_PRI }}
+        run: |
+          pnpm install
+
+      - name: Build
+        run: |
+          pnpm docs:build
+
+      - name: Upload
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ".vitepress/dist"
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4 # or specific "vX.X.X" version tag for this action
